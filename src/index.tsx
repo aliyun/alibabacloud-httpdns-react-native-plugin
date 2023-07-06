@@ -17,9 +17,40 @@ const AliyunHttpdnsReatNative = NativeModules.AliyunHttpdnsReatNative
     }
   );
 
+interface IPRanking {
+  hostName: string;
+  port: number;
+}
+
+enum IPStackType {
+  Unknown,
+
+  IPv4,
+
+  IPv6,
+
+  Both
+}
 
 export function multiply(a: number, b: number): Promise<number> {
   return AliyunHttpdnsReatNative.multiply(a, b);
+}
+
+/**
+ * 初始化
+ * @param accountId 
+ */
+export function initWithAccountId(accountId: string) {
+  AliyunHttpdnsReatNative.initWithAccountId(accountId);
+}
+
+/**
+ * 启用鉴权功能的初始化接口
+ * @param accountId 
+ * @param secretKey 
+ */
+export function initWithAccountIdAndSk(accountId: string, secretKey: string) {
+  AliyunHttpdnsReatNative.initWithAccountIdAndSk(accountId, secretKey);
 }
 
 /**
@@ -87,7 +118,92 @@ export function setPreResolveHostsWithIPType(hostList: Array<string>, requestIpT
   AliyunHttpdnsReatNative.setPreResolveHostsWithIPType(hostList, requestIpType)
 }
 
+/**
+ * 设置是否持久化缓存IP
+ * @param enabled 
+ */
+export function setCachedIPEnabled(enabled: boolean) {
+  AliyunHttpdnsReatNative.setCachedIPEnabled(enabled);
+}
 
+/**
+ * 设置是否允许返回超过ttl的IP
+ * @param enabled 
+ */
+export function setExpiredIPEnabled(enabled: boolean) {
+  AliyunHttpdnsReatNative.setExpiredIPEnabled(enabled);
+}
 
+/**
+ * 设置 HTTPDNS 域名解析请求类型 ( HTTP / HTTPS )
+ * @param enabled 
+ */
+export function setHTTPSRequestEnabled(enabled: boolean) {
+  AliyunHttpdnsReatNative.setHTTPSRequestEnabled(enabled);
+}
 
+/**
+ * 设置region节点，设置后，会按照region更新服务IP
+ * @param region 
+ */
+export function setRegion(region: string) {
+  AliyunHttpdnsReatNative.setRegion(region);
+}
 
+/**
+ * 立即清除域名端侧内存和本地缓存
+ * @param hostList 
+ */
+export function cleanHostCache(hostList: Array<string>) {
+  AliyunHttpdnsReatNative.cleanHostCache(hostList);
+}
+
+/**
+ * 设置IP优选
+ * @param ipRankingList 
+ */
+export function setIPRanking(ipRankingList: Array<IPRanking>) {
+  //TODO:
+}
+
+/**
+ * 获取当前网络栈
+ * @returns 
+ */
+export async function currentIPStack(): Promise<IPStackType> {
+  let ipStackNum = await AliyunHttpdnsReatNative.currentIPStack();
+  switch (ipStackNum) {
+    case 1:
+      return new Promise((resolve, _) => {
+        resolve(IPStackType.IPv4);
+      });
+    case 2:
+      return new Promise((resolve, _) => {
+        resolve(IPStackType.IPv6);
+      });
+    case 3:
+      return new Promise((resolve, _) => {
+        resolve(IPStackType.Both);
+      });
+    default:
+      return new Promise((resolve, _) => {
+        resolve(IPStackType.Unknown);
+      });
+  }
+}
+
+/**
+ * 校正 App 签名时间
+ * @param time 
+ */
+export function setAuthCurrentTime(time: number) {
+  AliyunHttpdnsReatNative.setAuthCurrentTime(time);
+}
+
+/**
+ * 开启IPv6，只对iOS有效
+ * @param enabled 
+ */
+export function enableIPv6(enabled: boolean) {
+
+}

@@ -42,14 +42,15 @@
     "android"
   ],
   "repository": "https://github.com/wangyun137/aliyun-httpdns-reat-native",
-  "author": "allen.wy <allen.wy@alibaba-inc.com> (https://github.com/wangyun137)",
+  "author": "aliyun",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/wangyun137/aliyun-httpdns-reat-native/issues"
   },
   "homepage": "https://github.com/wangyun137/aliyun-httpdns-reat-native#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@evilmartians/lefthook": "^1.2.2",
