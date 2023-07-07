@@ -32,6 +32,12 @@ enum IPStackType {
   Both
 }
 
+interface HttpDnsResult {
+  code: string;
+  errorMsg: string;
+  result?: any
+}
+
 export function multiply(a: number, b: number): Promise<number> {
   return AliyunHttpdnsReatNative.multiply(a, b);
 }
@@ -40,8 +46,8 @@ export function multiply(a: number, b: number): Promise<number> {
  * 初始化
  * @param accountId 
  */
-export function initWithAccountId(accountId: string) {
-  AliyunHttpdnsReatNative.initWithAccountId(accountId);
+export function initWithAccountId(accountId: string): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.initWithAccountId(accountId);
 }
 
 /**
@@ -49,8 +55,8 @@ export function initWithAccountId(accountId: string) {
  * @param accountId 
  * @param secretKey 
  */
-export function initWithAccountIdAndSk(accountId: string, secretKey: string) {
-  AliyunHttpdnsReatNative.initWithAccountIdAndSk(accountId, secretKey);
+export function initWithAccountIdAndSk(accountId: string, secretKey: string): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.initWithAccountIdAndSk(accountId, secretKey);
 }
 
 /**
@@ -58,7 +64,7 @@ export function initWithAccountIdAndSk(accountId: string, secretKey: string) {
  * @param host 
  * @returns 单个IPv4值
  */
-export function getIPv4ForHostAsync(host: string): Promise<string> {
+export function getIPv4ForHostAsync(host: string): Promise<HttpDnsResult> {
   return AliyunHttpdnsReatNative.getIPv4ForHostAsync(host);
 }
 
@@ -67,7 +73,7 @@ export function getIPv4ForHostAsync(host: string): Promise<string> {
  * @param host 
  * @returns IPv4列表
  */
-export function getIPv4ListForHostAsync(host: string): Promise<Array<string>> {
+export function getIPv4ListForHostAsync(host: string): Promise<HttpDnsResult> {
   return AliyunHttpdnsReatNative.getIPv4ListForHostAsync(host);
 }
 
@@ -76,7 +82,7 @@ export function getIPv4ListForHostAsync(host: string): Promise<Array<string>> {
  * @param host 
  * @returns 单个IPv6值
  */
-export function getIPv6ForHostAsync(host: string): Promise<string> {
+export function getIPv6ForHostAsync(host: string): Promise<HttpDnsResult> {
   return AliyunHttpdnsReatNative.getIPv4ForHostAsync(host);
 }
 
@@ -84,11 +90,11 @@ export function getIPv6ForHostAsync(host: string): Promise<string> {
  * 异步解析，获取IPv6
  * @param host IPv6列表
  */
-export function getIPv6ListForHostAsync(host: string): Promise<string> {
+export function getIPv6ListForHostAsync(host: string): Promise<HttpDnsResult> {
   return AliyunHttpdnsReatNative.getIPv6ListForHostAsync(host);
 }
 
-export function getIPv4IPv6ListForHostAsync(host: string): Promise<{}> {
+export function getIPv4IPv6ListForHostAsync(host: string): Promise<HttpDnsResult> {
   return AliyunHttpdnsReatNative.getIPv4IPv6ListForHostAsync(host);
 }
 
@@ -105,33 +111,33 @@ export function setHttpDnsLogEnabled(enabled: boolean) {
  * 设置预解析域名列表，默认解析v4
  * @param hostList 
  */
-export function setPreResolveHosts(hostList: Array<string>) {
-  AliyunHttpdnsReatNative.setPreResolveHosts(hostList);
+export function setPreResolveHosts(hostList: Array<string>): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.setPreResolveHosts(hostList);
 }
 
 /**
  * 设置预解析域名列表和解析的ip类型
  * @param hostList 
- * @param requestIpType 
+ * @param requestIpType 0 - v4, 1 - v6, 2 - both, 3 - auto
  */
-export function setPreResolveHostsWithIPType(hostList: Array<string>, requestIpType: number) {
-  AliyunHttpdnsReatNative.setPreResolveHostsWithIPType(hostList, requestIpType)
+export function setPreResolveHostsWithIPType(hostList: Array<string>, requestIpType: number): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.setPreResolveHostsWithIPType(hostList, requestIpType)
 }
 
 /**
  * 设置是否持久化缓存IP
  * @param enabled 
  */
-export function setCachedIPEnabled(enabled: boolean) {
-  AliyunHttpdnsReatNative.setCachedIPEnabled(enabled);
+export function setCachedIPEnabled(enabled: boolean): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.setCachedIPEnabled(enabled);
 }
 
 /**
  * 设置是否允许返回超过ttl的IP
  * @param enabled 
  */
-export function setExpiredIPEnabled(enabled: boolean) {
-  AliyunHttpdnsReatNative.setExpiredIPEnabled(enabled);
+export function setExpiredIPEnabled(enabled: boolean): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.setExpiredIPEnabled(enabled);
 }
 
 /**
@@ -146,24 +152,32 @@ export function setHTTPSRequestEnabled(enabled: boolean) {
  * 设置region节点，设置后，会按照region更新服务IP
  * @param region 
  */
-export function setRegion(region: string) {
-  AliyunHttpdnsReatNative.setRegion(region);
+export function setRegion(region: string): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.setRegion(region);
 }
 
 /**
  * 立即清除域名端侧内存和本地缓存
  * @param hostList 
  */
-export function cleanHostCache(hostList: Array<string>) {
-  AliyunHttpdnsReatNative.cleanHostCache(hostList);
+export function cleanHostCache(hostList: Array<string>): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.cleanHostCache(hostList);
 }
 
 /**
  * 设置IP优选
  * @param ipRankingList 
  */
-export function setIPRanking(ipRankingList: Array<IPRanking>) {
-  //TODO:
+export function setIPRanking(ipRankingList: Array<IPRanking>): Promise<HttpDnsResult> {
+  let list: any[] = [];
+  ipRankingList.forEach((e) => {
+    list.push({
+      "hostName": e.hostName,
+      "port": e.port
+    });
+  })
+
+  return AliyunHttpdnsReatNative.setIPRanking(list);
 }
 
 /**
@@ -196,7 +210,7 @@ export async function currentIPStack(): Promise<IPStackType> {
  * 校正 App 签名时间
  * @param time 
  */
-export function setAuthCurrentTime(time: number) {
+export function setAuthCurrentTime(time: number): Promise<HttpDnsResult> {
   AliyunHttpdnsReatNative.setAuthCurrentTime(time);
 }
 
@@ -205,6 +219,9 @@ export function setAuthCurrentTime(time: number) {
  * @param enabled 
  */
 export function enableIPv6(enabled: boolean) {
+  if (Platform.OS !== 'ios') {
+    return;
+  }
   AliyunHttpdnsReatNative.enableIPv6(enabled);
 }
 
@@ -212,14 +229,14 @@ export function enableIPv6(enabled: boolean) {
  * 设置降级的host列表
  * @param hostList 
  */
-export function setDegradationHost(hostList: Array<string>) {
-  AliyunHttpdnsReatNative.setDegradationHost(hostList);
+export function setDegradationHost(hostList: Array<string>): Promise<HttpDnsResult> {
+  return AliyunHttpdnsReatNative.setDegradationHost(hostList);
 }
 
 /**
  * 获取会话Id
  * @returns 
  */
-export function getSessionId(): Promise<string> {
+export function getSessionId(): Promise<HttpDnsResult> {
   return AliyunHttpdnsReatNative.getSessionId();
 }
