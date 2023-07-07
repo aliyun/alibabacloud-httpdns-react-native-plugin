@@ -1,16 +1,16 @@
 buildscript {
-  repositories {
-    google()
-    mavenCentral()
-  }
+    repositories {
+        google()
+        mavenCentral()
+    }
 
-  dependencies {
-    classpath "com.android.tools.build:gradle:7.2.1"
-  }
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.3.1"
+    }
 }
 
 def isNewArchitectureEnabled() {
-  return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
+    return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
 }
 
 apply plugin: "com.android.library"
@@ -19,56 +19,62 @@ apply plugin: "com.android.library"
 def appProject = rootProject.allprojects.find { it.plugins.hasPlugin('com.android.application') }
 
 if (isNewArchitectureEnabled()) {
-  apply plugin: "com.facebook.react"
+    apply plugin: "com.facebook.react"
 }
 
 def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["AliyunHttpdnsReatNative_" + name]
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["AliyunHttpdnsReatNative_" + name]
 }
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["AliyunHttpdnsReatNative_" + name]).toInteger()
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["AliyunHttpdnsReatNative_" + name]).toInteger()
 }
 
 android {
-  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+    compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
 
-  defaultConfig {
-    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
-    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
-    buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
-  }
-  buildTypes {
-    release {
-      minifyEnabled false
+    defaultConfig {
+        minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+        targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
     }
-  }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
 
-  lintOptions {
-    disable "GradleCompatible"
-  }
+    lintOptions {
+        disable "GradleCompatible"
+    }
 
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
 }
 
 repositories {
-  mavenCentral()
-  google()
+    mavenCentral()
+    google()
+    maven {
+        url 'http://maven.aliyun.com/nexus/content/repositories/releases/'
+        name 'aliyun'//一定要添加这个配置
+        allowInsecureProtocol = true
+    }
 }
 
 
 dependencies {
-  implementation "com.facebook.react:react-native:+"
+    implementation "com.facebook.react:react-native:+"
+    implementation 'com.aliyun.ams:alicloud-android-httpdns:2.3.1'
 }
 
 if (isNewArchitectureEnabled()) {
-  react {
-    jsRootDir = file("../src/")
-    libraryName = "AliyunHttpdnsReatNative"
-    codegenJavaPackageName = "com.aliyunhttpdnsreatnative"
-  }
+    react {
+        jsRootDir = file("../src/")
+        libraryName = "AliyunHttpdnsReatNative"
+        codegenJavaPackageName = "com.aliyunhttpdnsreatnative"
+    }
 }

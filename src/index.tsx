@@ -205,5 +205,21 @@ export function setAuthCurrentTime(time: number) {
  * @param enabled 
  */
 export function enableIPv6(enabled: boolean) {
+  AliyunHttpdnsReatNative.enableIPv6(enabled);
+}
 
+/**
+ * 设置降级的host列表
+ * @param hostList 
+ */
+export function setDegradationHost(hostList: Array<string>) {
+  AliyunHttpdnsReatNative.setDegradationHost(hostList);
+}
+
+/**
+ * 获取会话Id
+ * @returns 
+ */
+export function getSessionId(): Promise<string> {
+  return AliyunHttpdnsReatNative.getSessionId();
 }

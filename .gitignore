@@ -70,3 +70,5 @@ android/keystores/debug.keystore
 lib/
 
 CODE_OF_CONDUCT.md
+
+*.iml
