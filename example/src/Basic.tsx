@@ -10,6 +10,7 @@ export default function Basic() {
     const [enableCacheIP, setCachedIPEnabled] = useState(false);
     const [enableHTTPS, setHTTPSRequestEnabled] = useState(false);
     const [enableLog, setHttpDnsLogEnabled] = useState(false);
+    const [enableV6, setEnableV6] = useState(false);
 
     const [regionModalVisible, setRegionModalVisible] = useState(false);
     const [radioRegion, setRadioRegion] = React.useState('cn');
@@ -23,6 +24,23 @@ export default function Basic() {
     const [addPreResolveVisible, setAddPreResolveVisible] = React.useState(false);
     const [inputPreResolveHost, setInputPreReslveHost] = React.useState("");
 
+    //IP优选
+    const [addIPRankingVisible, setAddIPRankingVisible] = React.useState(false);
+    const [inputIPRankingHost, setInputIPRankingHost] = React.useState("");
+    const [inputIPRankingPort, setInputIPRankingPort] = React.useState("");
+
+    //ttl缓存
+    const [addTtlVisible, setAddTtlVisible] = React.useState(false);
+    const [inputTtlHost, setInputTtlHost] = React.useState("");
+    const [inputTtlTime, setInputTtlTime] = React.useState("");
+
+    //降级域名
+    const [degradationVisible, setDegradationVisible] = React.useState(false);
+    const [inputDegradationHost, setInputDegradationHost] = React.useState("");
+
+    //当前网络栈
+    const [currentIPStack, setCurrentIPStack] = React.useState("");
+
     const toggleExpiredIP = () => {
         AliyunHttpDns.setExpiredIPEnabled(!enableExpiredIP).then((result) => {
 
@@ -35,6 +53,10 @@ export default function Basic() {
                 Alert.alert('提示', `setExpiredIPEnabled failed: ${result.errorMsg}`);
             }
         })
+    }
+    const toggleEnableV6 = () => {
+        AliyunHttpDns.enableIPv6(enableV6);
+        setEnableV6(previousState => !previousState);
     }
     const toggleCachedIP = () => setCachedIPEnabled(previousState => !previousState);
     const toggleHTTPS = () => setHTTPSRequestEnabled(previousState => !previousState);
@@ -110,6 +132,18 @@ export default function Basic() {
                 />
             </View>
 
+            <View style={styles.container}>
+                <Text style={styles.text}>
+                    开启V6，只在iOS生效
+                </Text>
+                <Switch
+                    trackColor={{ false: "#767577", true: "#81b0ff" }}
+                    thumbColor={enableV6 ? "#1B58F4" : "#f4f3f4"}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={toggleEnableV6}
+                    value={enableV6}
+                />
+            </View>
             <View style={styles.container}>
                 <Modal
                     animationType="slide"
@@ -205,6 +239,10 @@ export default function Basic() {
                         setCleanHostCacheVisible(false);
                     }} />
                     <Dialog.Button label="确定" onPress={() => {
+                        if (inputCleanCacheHost === '') {
+                            Alert.alert("提示", "域名不能为空");
+                            return;
+                        }
                         setCleanHostCacheVisible(false);
                         let hostList = [];
                         hostList.push(inputCleanCacheHost);
@@ -231,14 +269,11 @@ export default function Basic() {
                                 : 'white'
                         },
                     ]}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Text style={styles.text}>
-                            清空指定域名缓存
-                        </Text>
-                    </View>
+                    <Text style={styles.text}>
+                        清空指定域名缓存
+                    </Text>
                 </Pressable>
             </View>
-
             <View style={styles.container}>
                 <Dialog.Container visible={addPreResolveVisible}>
                     <Dialog.Title>添加预解析域名</Dialog.Title>
@@ -248,6 +283,10 @@ export default function Basic() {
                         setAddPreResolveVisible(false);
                     }} />
                     <Dialog.Button label="确定" onPress={() => {
+                        if (inputPreResolveHost === '') {
+                            Alert.alert("提示", "域名不能为空");
+                            return;
+                        }
                         setAddPreResolveVisible(false);
                         let hostList = [];
                         hostList.push(inputPreResolveHost);
@@ -274,9 +313,194 @@ export default function Basic() {
                                 : 'white'
                         },
                     ]}>
+
+                    <Text style={styles.text}>
+                        添加预解析域名
+                    </Text>
+
+                </Pressable>
+            </View>
+            <View style={styles.container}>
+                <Dialog.Container visible={addIPRankingVisible}>
+                    <Dialog.Title>添加IP优选</Dialog.Title>
+                    <Dialog.Input label="请输入探测IP的域名" onChangeText={text => setInputIPRankingHost(text)} />
+                    <Dialog.Input label="请输入探测IP的端口" onChangeText={text => setInputIPRankingPort(text)} keyboardType="numeric" />
+                    <Dialog.Button label="取消" onPress={() => {
+                        setAddIPRankingVisible(false);
+                    }} />
+                    <Dialog.Button label="确定" onPress={() => {
+                        if (inputIPRankingHost === '') {
+                            Alert.alert("提示", "域名不能为空");
+                            return;
+                        }
+                        if (inputIPRankingPort === '') {
+                            Alert.alert("提示", "端口号不能为空");
+                            return;
+                        }
+                        setAddIPRankingVisible(false);
+                        let ipRankingList = [];
+                        ipRankingList.push({
+                            hostName: inputIPRankingHost,
+                            port: +inputIPRankingPort
+                        })
+                        AliyunHttpDns.setIPRanking(ipRankingList).then(result => {
+                            let code = result.code;
+                            if (code === AliyunHttpDns.kCodeSuccess) {
+                                Alert.alert('提示', `添加IP优选${inputIPRankingHost}:${inputIPRankingPort}成功`)
+                            } else {
+                                Alert.alert('提示', `添加IP优选${inputIPRankingHost}:${inputIPRankingPort}失败: ${result.errorMsg}`);
+                            }
+                            setInputIPRankingHost("");
+                            setInputIPRankingPort("");
+                        })
+                    }} />
+                </Dialog.Container>
+                <Pressable
+                    onPress={() => {
+                        setAddIPRankingVisible(true);
+                    }}
+                    style={({ pressed }) => [
+                        {
+                            flex: 1,
+                            backgroundColor: pressed
+                                ? 'rgb(210, 230, 255)'
+                                : 'white'
+                        },
+                    ]}>
+
+                    <Text style={styles.text}>
+                        添加IP优选
+                    </Text>
+
+                </Pressable>
+            </View>
+
+            <View style={styles.container}>
+                <Dialog.Container visible={addTtlVisible}>
+                    <Dialog.Title>添加自定义TTL</Dialog.Title>
+                    <Dialog.Input label="请输入自定义TTL的域名" onChangeText={text => setInputTtlHost(text)} />
+                    <Dialog.Input label="请输入自定义TTL的事件，单位: 秒" onChangeText={text => setInputTtlTime(text)} keyboardType="numeric" />
+                    <Dialog.Button label="取消" onPress={() => {
+                        setAddTtlVisible(false);
+                    }} />
+                    <Dialog.Button label="确定" onPress={() => {
+                        if (inputTtlHost === '') {
+                            Alert.alert("提示", "域名不能为空");
+                            return;
+                        }
+                        if (inputTtlTime === '') {
+                            Alert.alert("提示", "TTL时间不能为空");
+                            return;
+                        }
+                        setAddTtlVisible(false);
+                        AliyunHttpDns.addTtlCache(inputTtlHost, +inputTtlTime).then(result => {
+                            let code = result.code;
+                            if (code === AliyunHttpDns.kCodeSuccess) {
+                                Alert.alert('提示', `添加自定义TTL${inputTtlHost} - ${inputTtlTime}秒成功`)
+                            } else {
+                                Alert.alert('提示', `添加自定义TTL${inputTtlHost} - ${inputTtlTime}秒 失败: ${result.errorMsg}`);
+                            }
+                            setInputTtlHost("");
+                            setInputTtlTime("");
+                        })
+                    }} />
+                </Dialog.Container>
+                <Pressable
+                    onPress={() => {
+                        setAddTtlVisible(true);
+                    }}
+                    style={({ pressed }) => [
+                        {
+                            flex: 1,
+                            backgroundColor: pressed
+                                ? 'rgb(210, 230, 255)'
+                                : 'white'
+                        },
+                    ]}>
+
+                    <Text style={styles.text}>
+                        自定义TTL
+                    </Text>
+
+                </Pressable>
+            </View>
+
+            <View style={styles.container}>
+                <Dialog.Container visible={degradationVisible}>
+                    <Dialog.Title>添加降级域名</Dialog.Title>
+                    <Dialog.Input label="请输入降级的域名" onChangeText={text => setInputDegradationHost(text)} />
+                    <Dialog.Button label="取消" onPress={() => {
+                        setDegradationVisible(false);
+                    }} />
+                    <Dialog.Button label="确定" onPress={() => {
+                        if (inputDegradationHost === '') {
+                            Alert.alert("提示", "域名不能为空");
+                            return;
+                        }
+                        setDegradationVisible(false);
+                        let hostList = [];
+                        hostList.push(inputDegradationHost);
+                        AliyunHttpDns.setDegradationHost(hostList).then(result => {
+                            let code = result.code;
+                            if (code === AliyunHttpDns.kCodeSuccess) {
+                                Alert.alert('提示', `添加降级域名${inputDegradationHost}成功`)
+                            } else {
+                                Alert.alert('提示', `添加降级域名${inputDegradationHost}失败: ${result.errorMsg}`);
+                            }
+                            setInputDegradationHost("");
+                        })
+                    }} />
+                </Dialog.Container>
+                <Pressable
+                    onPress={() => {
+                        setDegradationVisible(true);
+                    }}
+                    style={({ pressed }) => [
+                        {
+                            flex: 1,
+                            backgroundColor: pressed
+                                ? 'rgb(210, 230, 255)'
+                                : 'white'
+                        },
+                    ]}>
+
+                    <Text style={styles.text}>
+                        添加降级域名列表
+                    </Text>
+
+                </Pressable>
+            </View>
+
+            <View style={styles.container}>
+                <Pressable
+                    onPress={() => {
+                        AliyunHttpDns.currentIPStack().then(result => {
+                            if (result === AliyunHttpDns.IPStackType.IPv4) {
+                                setCurrentIPStack("V4");
+                            } else if (result === AliyunHttpDns.IPStackType.IPv6) {
+                                setCurrentIPStack("V6");
+                            } else if (result === AliyunHttpDns.IPStackType.Both) {
+                                setCurrentIPStack("双栈");
+                            } else {
+                                setCurrentIPStack("未知");
+                            }
+                        });
+                    }}
+                    style={({ pressed }) => [
+                        {
+                            flex: 1,
+                            backgroundColor: pressed
+                                ? 'rgb(210, 230, 255)'
+                                : 'white'
+                        },
+                    ]}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={styles.text}>
-                            添加预解析域名
+                            当前网络栈类型
+                        </Text>
+
+                        <Text style={styles.text}>
+                            {currentIPStack}
                         </Text>
                     </View>
                 </Pressable>
@@ -311,7 +535,7 @@ const styles = StyleSheet.create({
 
     text: {
         paddingVertical: 15,
-        fontSize: 18,
+        fontSize: 16,
         color: 'black'
     },
 
