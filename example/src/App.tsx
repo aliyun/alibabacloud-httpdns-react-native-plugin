@@ -18,11 +18,7 @@ export default function App() {
     { key: 'first', title: '基础设置' },
     { key: 'second', title: 'HttpDNS解析' },
   ]);
-  const [result, setResult] = React.useState<number | undefined>();
 
-  // React.useEffect(() => {
-  //   multiply(3, 7).then(setResult);
-  // }, []);
 
   return (
     <TabView

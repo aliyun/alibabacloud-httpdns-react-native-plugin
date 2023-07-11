@@ -269,9 +269,14 @@ export default function Basic() {
                                 : 'white'
                         },
                     ]}>
-                    <Text style={styles.text}>
-                        清空指定域名缓存
-                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.text}>
+                            清空指定域名缓存
+                        </Text>
+                        <Text style={styles.text}>
+                            &gt;
+                        </Text>
+                    </View>
                 </Pressable>
             </View>
             <View style={styles.container}>
@@ -314,9 +319,14 @@ export default function Basic() {
                         },
                     ]}>
 
-                    <Text style={styles.text}>
-                        添加预解析域名
-                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.text}>
+                            添加预解析域名
+                        </Text>
+                        <Text style={styles.text}>
+                            &gt;
+                        </Text>
+                    </View>
 
                 </Pressable>
             </View>
@@ -368,9 +378,14 @@ export default function Basic() {
                         },
                     ]}>
 
-                    <Text style={styles.text}>
-                        添加IP优选
-                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.text}>
+                            添加IP优选
+                        </Text>
+                        <Text style={styles.text}>
+                            &gt;
+                        </Text>
+                    </View>
 
                 </Pressable>
             </View>
@@ -418,9 +433,14 @@ export default function Basic() {
                         },
                     ]}>
 
-                    <Text style={styles.text}>
-                        自定义TTL
-                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.text}>
+                            自定义TTL
+                        </Text>
+                        <Text style={styles.text}>
+                            &gt;
+                        </Text>
+                    </View>
 
                 </Pressable>
             </View>
@@ -464,9 +484,14 @@ export default function Basic() {
                         },
                     ]}>
 
-                    <Text style={styles.text}>
-                        添加降级域名列表
-                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.text}>
+                            添加降级域名列表
+                        </Text>
+                        <Text style={styles.text}>
+                            &gt;
+                        </Text>
+                    </View>
 
                 </Pressable>
             </View>
