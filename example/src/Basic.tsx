@@ -458,9 +458,7 @@ export default function Basic() {
                             return;
                         }
                         setDegradationVisible(false);
-                        let hostList = [];
-                        hostList.push(inputDegradationHost);
-                        AliyunHttpDns.setDegradationHost(hostList).then(result => {
+                        AliyunHttpDns.setDegradationHost(inputDegradationHost).then(result => {
                             let code = result.code;
                             if (code === AliyunHttpDns.kCodeSuccess) {
                                 Alert.alert('提示', `添加降级域名${inputDegradationHost}成功`)

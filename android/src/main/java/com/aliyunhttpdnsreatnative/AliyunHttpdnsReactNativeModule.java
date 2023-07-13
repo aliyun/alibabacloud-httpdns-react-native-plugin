@@ -1,11 +1,16 @@
 package com.aliyunhttpdnsreatnative;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import com.alibaba.sdk.android.httpdns.CacheTtlChanger;
 import com.alibaba.sdk.android.httpdns.DegradationFilter;
+import com.alibaba.sdk.android.httpdns.HTTPDNSResult;
 import com.alibaba.sdk.android.httpdns.HttpDns;
 import com.alibaba.sdk.android.httpdns.HttpDnsService;
+import com.alibaba.sdk.android.httpdns.InitConfig;
+import com.alibaba.sdk.android.httpdns.InitConfig.Builder;
 import com.alibaba.sdk.android.httpdns.NetType;
 import com.alibaba.sdk.android.httpdns.RequestIpType;
 import com.alibaba.sdk.android.httpdns.log.HttpDnsLog;
@@ -31,7 +36,7 @@ import com.facebook.react.module.annotations.ReactModule;
 
 @ReactModule(name = AliyunHttpdnsReactNativeModule.NAME)
 public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
-	public static final String NAME = "AliyunHttpdnsReatNative";
+	public static final String NAME = "AliyunHttpdns";
 
 	private static final String CODE_KEY = "code";
 	private static final String ERROR_MSG_KEY = "errorMsg";
@@ -54,14 +59,31 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 	private static final String CODE_INIT_FIRST = "10002";
 
 	/**
+	 * 初始化失败
+	 */
+	private static final String CODE_INIT_FAILED = "10003";
+
+	/**
 	 * 获取的结果为空
 	 */
-	private static final String CODE_RESULT_EMPTY = "10003";
+	private static final String CODE_RESULT_EMPTY = "10004";
 
 
 
 	private final Context mContext;
 	private HttpDnsService mHttpDnsService;
+
+	private final HashMap<String, Integer> mTtlCache = new HashMap<>();
+
+	private final CacheTtlChanger mCacheTtlChanger = (host, requestIpType, ttl) -> {
+		if (mTtlCache.containsKey(host)) {
+			return mTtlCache.get(host);
+		}
+		return ttl;
+	};
+
+	private final List<String> mDegradationList = new ArrayList<>();
+	private final DegradationFilter mDegradationFilter = mDegradationList::contains;
 
 	public AliyunHttpdnsReactNativeModule(ReactApplicationContext reactContext) {
 		super(reactContext);
@@ -74,27 +96,29 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 		return NAME;
 	}
 
-	// Example method
-	// See https://reactnative.dev/docs/native-modules-android
-	@ReactMethod
-	public void multiply(double a, double b, Promise promise) {
-		promise.resolve(a * b);
-	}
-
 	@ReactMethod
 	public void initWithAccountId(String accountId, Promise promise) {
 		if (TextUtils.isEmpty(accountId)) {
 			WritableMap result = new WritableNativeMap();
 			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
-			result.putString(ERROR_MSG_KEY, "accountId is empty");
+			result.putString(ERROR_MSG_KEY, "accountId is illegal");
 			promise.resolve(result);
 			return;
 		}
 
+		InitConfig.Builder builder = new Builder().configCacheTtlChanger(mCacheTtlChanger);
+		builder.buildFor(accountId);
+
 		mHttpDnsService = HttpDns.getService(mContext, accountId);
+		mHttpDnsService.setDegradationFilter(mDegradationFilter);
 		WritableMap result = new WritableNativeMap();
-		result.putString(CODE_KEY, CODE_SUCCESS);
-		result.putString(ERROR_MSG_KEY, "success");
+		if (mHttpDnsService != null) {
+			result.putString(CODE_KEY, CODE_SUCCESS);
+			result.putString(ERROR_MSG_KEY, "success");
+		} else {
+			result.putString(CODE_KEY, CODE_INIT_FAILED);
+			result.putString(ERROR_MSG_KEY, "init failed");
+		}
 		promise.resolve(result);
 	}
 
@@ -107,10 +131,18 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			promise.resolve(result);
 			return;
 		}
+		InitConfig.Builder builder = new Builder().configCacheTtlChanger(mCacheTtlChanger);
+		builder.buildFor(accountId);
 		mHttpDnsService = HttpDns.getService(mContext, accountId, secretKey);
+		mHttpDnsService.setDegradationFilter(mDegradationFilter);
 		WritableMap result = new WritableNativeMap();
-		result.putString(CODE_KEY, CODE_SUCCESS);
-		result.putString(ERROR_MSG_KEY, "success");
+		if (mHttpDnsService != null) {
+			result.putString(CODE_KEY, CODE_SUCCESS);
+			result.putString(ERROR_MSG_KEY, "success");
+		} else {
+			result.putString(CODE_KEY, CODE_INIT_FAILED);
+			result.putString(ERROR_MSG_KEY, "init failed");
+		}
 		promise.resolve(result);
 	}
 
@@ -120,6 +152,14 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			WritableMap result = new WritableNativeMap();
 			result.putString(CODE_KEY, CODE_INIT_FIRST);
 			result.putString(ERROR_MSG_KEY, "please call init method first");
+			promise.resolve(result);
+			return;
+		}
+
+		if (TextUtils.isEmpty(host)) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "host is empty");
 			promise.resolve(result);
 			return;
 		}
@@ -197,7 +237,7 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			return;
 		}
 
-		String[] ipv6List = mHttpDnsService.getIpsByHostAsync(host);
+		String[] ipv6List = mHttpDnsService.getIPv6sByHostAsync(host);
 		WritableMap result = new WritableNativeMap();
 		if (ipv6List == null || ipv6List.length == 0) {
 			result.putString(CODE_KEY, CODE_RESULT_EMPTY);
@@ -210,6 +250,47 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 				array.pushString(ipv6);
 			}
 			result.putArray(RESULT_KEY, array);
+		}
+		promise.resolve(result);
+	}
+
+	@ReactMethod
+	public void getIPv4IPv6ListForHostAsync(String host, Promise promise) {
+		if (mHttpDnsService == null) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_INIT_FIRST);
+			result.putString(ERROR_MSG_KEY, "please call init method first");
+			promise.resolve(result);
+			return;
+		}
+		HTTPDNSResult httpdnsResult = mHttpDnsService.getAllByHostAsync(host);
+		WritableMap result = new WritableNativeMap();
+		if (httpdnsResult == null) {
+			result.putString(CODE_KEY, CODE_RESULT_EMPTY);
+			result.putString(ERROR_MSG_KEY, "ipv4 and ipv6 list result is empty");
+		} else {
+			result.putString(CODE_KEY, CODE_SUCCESS);
+			result.putString(ERROR_MSG_KEY, "success");
+			WritableArray v4Array = new WritableNativeArray();
+			WritableArray v6Array = new WritableNativeArray();
+
+			String[] ipv4List = httpdnsResult.getIps();
+			if (ipv4List != null && ipv4List.length > 0) {
+				for (String ipv4 : ipv4List) {
+					v4Array.pushString(ipv4);
+				}
+			}
+			String[] ipv6List = httpdnsResult.getIpv6s();
+			if (ipv6List != null && ipv6List.length > 0) {
+				for (String ipv6 : ipv6List) {
+					v6Array.pushString(ipv6);
+				}
+			}
+
+			WritableMap writableMap = new WritableNativeMap();
+			writableMap.putArray("ipv4", v4Array);
+			writableMap.putArray("ipv6", v6Array);
+			result.putMap(RESULT_KEY, writableMap);
 		}
 		promise.resolve(result);
 	}
@@ -418,6 +499,14 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			return;
 		}
 
+		if (time < 0) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "time is illegal");
+			promise.resolve(result);
+			return;
+		}
+
 		mHttpDnsService.setAuthCurrentTime(time);
 		WritableMap result = new WritableNativeMap();
 		result.putString(CODE_KEY, CODE_SUCCESS);
@@ -449,7 +538,7 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void setDegradationHost(ReadableArray hostList, Promise promise) {
+	public void setDegradationHost(String host, Promise promise) {
 		if (mHttpDnsService == null) {
 			WritableMap result = new WritableNativeMap();
 			result.putString(CODE_KEY, CODE_INIT_FIRST);
@@ -458,12 +547,50 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			return;
 		}
 
-		List<String> list = new ArrayList<>();
-		for (int i = 0; i < hostList.size(); i++) { {
-			list.add(hostList.getString(i));
-		}}
+		if (TextUtils.isEmpty(host)) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "host is empty");
+			promise.resolve(result);
+			return;
+		}
+		mDegradationList.add(host);
+		WritableMap result = new WritableNativeMap();
+		result.putString(CODE_KEY, CODE_SUCCESS);
+		result.putString(ERROR_MSG_KEY, "success");
+		promise.resolve(result);
+	}
 
-		DegradationFilter filter = list::contains;
-		mHttpDnsService.setDegradationFilter(filter);
+	@ReactMethod
+	public void addTtlCache(String host, int ttl, Promise promise) {
+		if (mHttpDnsService == null) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_INIT_FIRST);
+			result.putString(ERROR_MSG_KEY, "please call init method first");
+			promise.resolve(result);
+			return;
+		}
+
+		if (TextUtils.isEmpty(host)) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "host is empty");
+			promise.resolve(result);
+			return;
+		}
+
+		if (ttl < 0) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "ttl is illegal");
+			promise.resolve(result);
+			return;
+		}
+
+		mTtlCache.put(host, ttl);
+		WritableMap result = new WritableNativeMap();
+		result.putString(CODE_KEY, CODE_SUCCESS);
+		result.putString(ERROR_MSG_KEY, "success");
+		promise.resolve(result);
 	}
 }
