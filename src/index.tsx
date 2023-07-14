@@ -261,7 +261,7 @@ export function getSessionId(): Promise<HttpDnsResult> {
 }
 
 /**
- * 添加域名
+ * 添加自定义TTL域名
  * @param host 
  * @param ttl 
  * @returns 

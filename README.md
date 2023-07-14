@@ -513,3 +513,234 @@ AliyunHttpDns.setExpiredIPEnabled(enabled).then(result => {
 ```javascript
 AliyunHttpDns.setHTTPSRequestEnabled(enabled);
 ```
+
+### setRegion
+
+设置region节点，设置后，会按照region更新服务IP
+
+`function setRegion(region: string): Promise<HttpDnsResult>`
+
+参数:
+
+| 参数名 | 类型 | 是否必须 |
+| --- | --- | --- |
+| region | string | 必选参数 |
+
+返回值：
+
+`HttpDnsResult`包含两个key值：
+
++ `code`: 错误码
++ `errorMsg`: 错误信息
+
+代码示例:
+
+```javascript
+AliyunHttpDns.setRegion(region).then((result) => {
+    let code = result.code;
+    if (code === AliyunHttpDns.kCodeSuccess) {
+        Alert.alert('提示', "设置Region成功")
+    } else {
+        Alert.alert('提示', `设置Region失败: ${result.errorMsg}`);
+    }
+);
+```
+
+### cleanHostCache
+
+立即清除域名端侧内存和本地缓存
+
+`function cleanHostCache(hostList: Array<string>): Promise<HttpDnsResult>`
+
+参数:
+
+| 参数名 | 类型 | 是否必须 |
+| --- | --- | --- |
+| hostList | Array\<string> | 必选参数 |
+
+返回值：
+
+`HttpDnsResult`包含两个key值：
+
++ `code`: 错误码
++ `errorMsg`: 错误信息
+
+代码示例：
+
+```javascript
+AliyunHttpDns.cleanHostCache(hostList).then(result => {
+    let code = result.code;
+    if (code === AliyunHttpDns.kCodeSuccess) {
+        Alert.alert('提示', `清除${inputCleanCacheHost}的缓存成功`)
+    } else {
+        Alert.alert('提示', `清除${inputCleanCacheHost}的缓存失败: ${result.errorMsg}`);
+    }
+})
+```
+
+### setIPRanking
+
+设置IP优选
+
+`function setIPRanking(ipRankingList: Array<IPRanking>): Promise<HttpDnsResult>`
+
+
+参数:
+
+| 参数名 | 类型 | 是否必须 |
+| --- | --- | --- |
+| ipRankingList | Array\<IPRanking> | 必选参数 |
+
+`IPRanking`数据结构：
+
+```javascript
+interface IPRanking {
+  hostName: string;
+  port: number;
+}
+```
+
+返回值：
+
+`HttpDnsResult`包含两个key值：
+
++ `code`: 错误码
++ `errorMsg`: 错误信息
+
+代码示例：
+
+```javascript
+let ipRankingList = [];
+ipRankingList.push({
+    hostName: inputIPRankingHost,
+    port: +inputIPRankingPort
+ });
+
+AliyunHttpDns.setIPRanking(ipRankingList).then(result => {
+    let code = result.code;
+    if (code === AliyunHttpDns.kCodeSuccess) {
+        Alert.alert('提示', `添加IP优选${inputIPRankingHost}:${inputIPRankingPort}成功`)
+    } else {
+        Alert.alert('提示', `添加IP优选${inputIPRankingHost}:${inputIPRankingPort}失败: ${result.errorMsg}`);
+    }                        
+})
+```
+
+### currentIPStack
+
+获取当前网络栈
+
+`function currentIPStack(): Promise<IPStackType>`
+
+返回值：
+
+`IPStackType`：
+
++ `IPStackType.IPv4`: IPv4-only网络
++ `IPStackType.IPv6`: IPv6-only网络
++ `IPStackType.Both`: 双栈网络
++ `IPStackType.Unknown`: 未检测出
+
+代码示例：
+
+```javascript
+AliyunHttpDns.currentIPStack().then(result => {
+    if (result === AliyunHttpDns.IPStackType.IPv4) {
+        setCurrentIPStack("V4");
+    } else if (result === AliyunHttpDns.IPStackType.IPv6) {
+        setCurrentIPStack("V6");
+    } else if (result === AliyunHttpDns.IPStackType.Both) {
+        setCurrentIPStack("双栈");
+    } else {
+        setCurrentIPStack("未知");
+    }
+});
+```
+
+### setDegradationHost
+
+设置降级的host列表
+
+`function setDegradationHost(host: string): Promise<HttpDnsResult>`
+
+参数:
+
+| 参数名 | 类型 | 是否必须 |
+| --- | --- | --- |
+| host | string| 必选参数 |
+
+
+返回值：
+
+`HttpDnsResult`包含两个key值：
+
++ `code`: 错误码
++ `errorMsg`: 错误信息
+
+代码示例：
+
+```javascript
+AliyunHttpDns.setDegradationHost(inputDegradationHost).then(result => {
+    let code = result.code;
+    if (code === AliyunHttpDns.kCodeSuccess) {
+        Alert.alert('提示', `添加降级域名${inputDegradationHost}成功`)
+    } else {
+        Alert.alert('提示', `添加降级域名${inputDegradationHost}失败: ${result.errorMsg}`);
+    }
+})
+```
+
+### getSessionId
+
+获取会话Id
+
+`function getSessionId(): Promise<HttpDnsResult>`
+
+返回值：
+
+`HttpDnsResult`包含两个key值：
+
++ `code`: 错误码
++ `errorMsg`: 错误信息
++ `result`: sessionId
+
+代码示例：
+
+```javascript
+AliyunHttpDns.getSessionId().then(result => {
+
+});
+```
+
+### addTtlCache
+
+添加自定义TTL域名
+
+`function addTtlCache(host: string, ttl: number): Promise<HttpDnsResult>`
+
+参数:
+
+| 参数名 | 类型 | 是否必须 |
+| --- | --- | --- |
+| host | string| 必选参数 |
+| ttl | number| 必选参数 - 秒为单位 |
+
+返回值：
+
+`HttpDnsResult`包含两个key值：
+
++ `code`: 错误码
++ `errorMsg`: 错误信息
+
+代码示例：
+
+```javascript
+AliyunHttpDns.addTtlCache(inputTtlHost, +inputTtlTime).then(result => {
+    let code = result.code;
+    if (code === AliyunHttpDns.kCodeSuccess) {
+        Alert.alert('提示', `添加自定义TTL${inputTtlHost} - ${inputTtlTime}秒成功`)
+    } else {
+        Alert.alert('提示', `添加自定义TTL${inputTtlHost} - ${inputTtlTime}秒 失败: ${result.errorMsg}`);
+    }
+})
+```
