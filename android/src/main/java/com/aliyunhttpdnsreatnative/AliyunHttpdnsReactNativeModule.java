@@ -187,6 +187,14 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			return;
 		}
 
+		if (TextUtils.isEmpty(host)) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "host is empty");
+			promise.resolve(result);
+			return;
+		}
+
 		String[] ipv4List = mHttpDnsService.getIpsByHostAsync(host);
 		WritableMap result = new WritableNativeMap();
 		if (ipv4List == null || ipv4List.length == 0) {
@@ -214,6 +222,14 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			return;
 		}
 
+		if (TextUtils.isEmpty(host)) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "host is empty");
+			promise.resolve(result);
+			return;
+		}
+
 		String ipv6 = mHttpDnsService.getIPv6ByHostAsync(host);
 		WritableMap result = new WritableNativeMap();
 		if (!TextUtils.isEmpty(ipv6)) {
@@ -233,6 +249,14 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			WritableMap result = new WritableNativeMap();
 			result.putString(CODE_KEY, CODE_INIT_FIRST);
 			result.putString(ERROR_MSG_KEY, "please call init method first");
+			promise.resolve(result);
+			return;
+		}
+
+		if (TextUtils.isEmpty(host)) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "host is empty");
 			promise.resolve(result);
 			return;
 		}
@@ -263,6 +287,15 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			promise.resolve(result);
 			return;
 		}
+
+		if (TextUtils.isEmpty(host)) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "host is empty");
+			promise.resolve(result);
+			return;
+		}
+
 		HTTPDNSResult httpdnsResult = mHttpDnsService.getAllByHostAsync(host);
 		WritableMap result = new WritableNativeMap();
 		if (httpdnsResult == null) {
@@ -313,7 +346,7 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 		if (hostList == null || hostList.size() == 0) {
 			WritableMap result = new WritableNativeMap();
 			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
-			result.putString(ERROR_MSG_KEY, "host list is empty");
+			result.putString(ERROR_MSG_KEY, "preResolve host list is empty");
 			promise.resolve(result);
 			return;
 		}
@@ -424,6 +457,14 @@ public class AliyunHttpdnsReactNativeModule extends ReactContextBaseJavaModule {
 			WritableMap result = new WritableNativeMap();
 			result.putString(CODE_KEY, CODE_INIT_FIRST);
 			result.putString(ERROR_MSG_KEY, "please call init method first");
+			promise.resolve(result);
+			return;
+		}
+
+		if (TextUtils.isEmpty(region)) {
+			WritableMap result = new WritableNativeMap();
+			result.putString(CODE_KEY, CODE_PARAM_ILLEGAL);
+			result.putString(ERROR_MSG_KEY, "region is empty");
 			promise.resolve(result);
 			return;
 		}

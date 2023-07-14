@@ -48,7 +48,6 @@ export default function Resolve() {
             case 2:
                 //单v6
                 AliyunHttpDns.getIPv6ForHostAsync(host).then(result => {
-                    console.log(result);
                     let code = result.code;
                     if (code === AliyunHttpDns.kCodeSuccess) {
                         let v6 = result.result;
@@ -80,7 +79,7 @@ export default function Resolve() {
                         let v6List = v4v6Map.ipv6;
                         setResolveResult(`IPv4结果:\n\n${v4List.join('\n')}\n\nIPv6结果:\n\n${v6List.join('\n')}`);
                     } else {
-                        Alert.alert('提示', `获取多个IPv6地址失败: ${result.errorMsg}`);
+                        Alert.alert('提示', `获取IPv4和IPv6地址失败: ${result.errorMsg}`);
                     }
                 });
                 break;
