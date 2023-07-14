@@ -41,13 +41,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/wangyun137/aliyun-httpdns-reat-native",
+  "repository": "https://github.com/aliyun/alibabacloud-httpdns-reactnative-plugin",
   "author": "aliyun",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wangyun137/aliyun-httpdns-reat-native/issues"
+    "url": "https://github.com/aliyun/alibabacloud-httpdns-reactnative-plugin/issues"
   },
-  "homepage": "https://github.com/wangyun137/aliyun-httpdns-reat-native#readme",
+  "homepage": "https://github.com/aliyun/alibabacloud-httpdns-reactnative-plugin#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
