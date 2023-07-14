@@ -41,6 +41,7 @@ static NSString* const CODE_RESULT_EMPTY = @"10004";
     NSMutableDictionary<NSString *,  NSNumber *>* _ttlCache;
     NSMutableArray* _degradationList;
 }
+
 RCT_EXPORT_MODULE()
 
 - (id) init {
@@ -49,7 +50,6 @@ RCT_EXPORT_MODULE()
     _degradationList = [[NSMutableArray alloc] init];
     return self;
 }
-
 
 
 RCT_REMAP_METHOD(initWithAccountId,
@@ -151,6 +151,7 @@ RCT_REMAP_METHOD(getIPv6ForHostAsync,
     }
     
     NSString* ipv6 = [_dnsService getIPv6ByHostAsync:host];
+    NSLog(@"ipv6 %@", ipv6);
     if (ipv6) {
         resolve(@{KEY_CODE:CODE_SUCCESS, KEY_ERROR_MSG: @"success", KEY_RESULT: ipv6});
     } else {
@@ -407,6 +408,8 @@ RCT_REMAP_METHOD(enableIPv6,
         resolve(@{KEY_CODE:CODE_INIT_FIRST, KEY_ERROR_MSG: @"please call init method first"});
         return;
     }
+    
+    NSLog(@"###### enableIPv6: %@", enabled ? @"YES": @"NO");
     
     [_dnsService enableIPv6:enabled];
     resolve(@{KEY_CODE:CODE_SUCCESS, KEY_ERROR_MSG: @"success"});

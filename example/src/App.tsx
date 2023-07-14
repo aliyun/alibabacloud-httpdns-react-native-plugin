@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useWindowDimensions } from 'react-native';
+import { Platform, SafeAreaView, StatusBar, useWindowDimensions } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import Basic from './Basic';
 import Resolve from './Resolve';
@@ -19,6 +19,18 @@ export default function App() {
     { key: 'second', title: 'HttpDNS解析' },
   ]);
 
+  if (Platform.OS === 'ios') {
+    return (
+      <SafeAreaView style={{ flex: 1, paddingTop: StatusBar.currentHeight }}>
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={setIndex}
+          initialLayout={{ width: layout.width }}
+        />
+      </SafeAreaView>
+    )
+  }
 
   return (
     <TabView

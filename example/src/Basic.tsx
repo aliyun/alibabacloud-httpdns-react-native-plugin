@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { View, Switch, StyleSheet, Text, ScrollView, Alert, Button, Pressable, Modal } from "react-native";
-import { RadioButton } from 'react-native-paper';
 import Dialog from "react-native-dialog";
 
 import * as AliyunHttpDns from 'aliyun-httpdns-reat-native';
+import { RadioButtonProps, RadioGroup } from "react-native-radio-buttons-group";
 
 export default function Basic() {
     const [enableExpiredIP, setExpiredIPEnabled] = useState(false);
@@ -41,26 +41,73 @@ export default function Basic() {
     //当前网络栈
     const [currentIPStack, setCurrentIPStack] = React.useState("");
 
-    const toggleExpiredIP = () => {
-        AliyunHttpDns.setExpiredIPEnabled(!enableExpiredIP).then((result) => {
-
+    const toggleExpiredIP = (enabled: boolean) => {
+        AliyunHttpDns.setExpiredIPEnabled(enabled).then((result) => {
             let code = result.code;
             if (code === AliyunHttpDns.kCodeSuccess) {
                 setExpiredIPEnabled(previousState => !previousState);
+                Alert.alert('提示', '允许过期IP成功');
             } else if (code === AliyunHttpDns.kCodeInitFirst) {
                 Alert.alert('提示', '请先初始化HttpDNS');
             } else {
-                Alert.alert('提示', `setExpiredIPEnabled failed: ${result.errorMsg}`);
+                Alert.alert('提示', `允许过期IP失败: ${result.errorMsg}`);
             }
         })
     }
-    const toggleEnableV6 = () => {
-        AliyunHttpDns.enableIPv6(enableV6);
-        setEnableV6(previousState => !previousState);
+    const toggleEnableV6 = (enabled: boolean) => {
+        AliyunHttpDns.enableIPv6(enabled).then(result => {
+            let code = result.code;
+            if (code === AliyunHttpDns.kCodeSuccess) {
+                Alert.alert('提示', enabled ? '开启v6成功' : '关闭v6成功');
+                setEnableV6(previousState => !previousState);
+            } else if (code === AliyunHttpDns.kCodeInitFirst) {
+                Alert.alert('提示', '请先初始化HttpDNS');
+            } else {
+                Alert.alert('提示', `${enabled ? '开启v6失败' : '关闭v6失败'}: ${result.errorMsg}`);
+            }
+        });
     }
-    const toggleCachedIP = () => setCachedIPEnabled(previousState => !previousState);
-    const toggleHTTPS = () => setHTTPSRequestEnabled(previousState => !previousState);
-    const toggleLog = () => setHttpDnsLogEnabled(previousState => !previousState);
+    const toggleCachedIP = (enabled: boolean) => {
+        AliyunHttpDns.setCachedIPEnabled(enabled).then(result => {
+            let code = result.code;
+            if (code === AliyunHttpDns.kCodeSuccess) {
+                setCachedIPEnabled(previousState => !previousState);
+                Alert.alert('提示', '开启持久化缓存成功');
+            } else if (code === AliyunHttpDns.kCodeInitFirst) {
+                Alert.alert('提示', '请先初始化HttpDNS');
+            } else {
+                Alert.alert('提示', `开启持久化缓存失败: ${result.errorMsg}`);
+            }
+        });
+
+    }
+    const toggleHTTPS = (enabled: boolean) => {
+        setHTTPSRequestEnabled(previousState => !previousState);
+        AliyunHttpDns.setHTTPSRequestEnabled(enabled);
+    }
+    const toggleLog = (enabled: boolean) => {
+        setHttpDnsLogEnabled(previousState => !previousState);
+        AliyunHttpDns.setHttpDnsLogEnabled(enabled);
+    }
+
+
+    const radioButtons: RadioButtonProps[] = useMemo(() => ([
+        {
+            id: 'cn', // acts as primary key, should be unique and non-empty string
+            label: '中国',
+            value: 'cn'
+        },
+        {
+            id: 'hk',
+            label: '中国香港',
+            value: 'hk'
+        },
+        {
+            id: 'sg',
+            label: '新加坡',
+            value: 'sg'
+        }
+    ]), []);
 
 
     return (
@@ -154,30 +201,16 @@ export default function Basic() {
                     }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
-                            <View style={styles.radioRow}>
-                                <Text style={styles.modalText}>中国</Text>
-                                <RadioButton
-                                    value="cn"
-                                    status={radioRegion === 'cn' ? 'checked' : 'unchecked'}
-                                    onPress={() => setRadioRegion('cn')}
-                                />
-                            </View>
-                            <View style={styles.radioRow}>
-                                <Text style={styles.modalText}>中国香港</Text>
-                                <RadioButton
-                                    value="hk"
-                                    status={radioRegion === 'hk' ? 'checked' : 'unchecked'}
-                                    onPress={() => setRadioRegion('hk')}
-                                />
-                            </View>
-                            <View style={styles.radioRow}>
-                                <Text style={styles.modalText}>新加坡</Text>
-                                <RadioButton
-                                    value="sg"
-                                    status={radioRegion === 'sg' ? 'checked' : 'unchecked'}
-                                    onPress={() => setRadioRegion('sg')}
-                                />
-                            </View>
+                            <RadioGroup
+                                containerStyle={{
+                                    alignItems: 'flex-start',
+                                }}
+                                radioButtons={radioButtons}
+                                onPress={(id) => {
+                                    setRadioRegion(id);
+                                }}
+                                selectedId={radioRegion}
+                            />
                             <View style={{ width: 100, marginTop: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
                                 <Button
                                     title="取消"
