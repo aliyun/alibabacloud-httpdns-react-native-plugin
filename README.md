@@ -744,3 +744,37 @@ AliyunHttpDns.addTtlCache(inputTtlHost, +inputTtlTime).then(result => {
     }
 })
 ```
+
+### enableIPv6
+
+开启IPv6，只对iOS有效，如果应用需要在iOS上获取ipv6地址，需要打开该开关，Android自动是打开的，无需调用该方法
+
+`function enableIPv6(enabled: boolean): Promise<HttpDnsResult>`
+
+参数:
+
+| 参数名 | 类型 | 是否必须 |
+| --- | --- | --- |
+| enabled | boolean| 必选参数 |
+
+返回值：
+
+`HttpDnsResult`包含两个key值：
+
++ `code`: 错误码
++ `errorMsg`: 错误信息
+
+代码示例:
+
+```javascript
+AliyunHttpDns.enableIPv6(enabled).then(result => {
+    let code = result.code;
+    if (code === AliyunHttpDns.kCodeSuccess) {
+        Alert.alert('提示', enabled ? '开启v6成功' : '关闭v6成功');
+    } else if (code === AliyunHttpDns.kCodeInitFirst) {
+        Alert.alert('提示', '请先初始化HttpDNS');
+    } else {
+        Alert.alert('提示', `${enabled ? '开启v6失败' : '关闭v6失败'}: ${result.errorMsg}`);
+    }
+});
+```
